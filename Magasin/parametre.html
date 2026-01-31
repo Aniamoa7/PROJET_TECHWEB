@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Magasin en Ligne</title>
+    <link rel="stylesheet" href="css/reset.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/composant.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="js/config.js"></script>
+</head>
+
+<body class="settings-page">
+    <header class="page-header no-sticky">
+        <div class="container">
+            <a href="home.html" class="back-link">← Retour</a>
+            <h1>Paramètres du compte</h1>
+        </div>
+    </header>
+
+    <main class="container settings-container">
+        <div id="successMessage"
+            style="color:#28a745;margin:1rem 0;display:none;padding:0.75rem;background:#e8f5e9;border-radius:8px;border-left:4px solid #4caf50;">
+        </div>
+        <div id="errorMessage"
+            style="color:#A03B2C;margin:1rem 0;display:none;padding:0.75rem;background:#ffebee;border-radius:8px;border-left:4px solid #f44336;">
+        </div>
+
+        <form class="settings-form" id="settingsForm">
+            <section class="form-section">
+                <h2>Préférences générales</h2>
+                <div class="form-row">
+                    <label for="language">Langue</label>
+                    <select id="language" name="language">
+                        <option value="fr">Français</option>
+                        <option value="en">Anglais</option>
+                        <option value="es">Espagnol</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="currency">Devise</label>
+                    <select id="currency" name="currency">
+                        <option value="eur">Euro (EUR)</option>
+                        <option value="dinar">Dinar (DZD)</option>
+                        <option value="usd">Dollar (USD)</option>
+                        <option value="gbp">Livre (GBP)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="notifications">Notifications</label>
+                    <select id="notifications" name="notifications">
+                        <option value="all">Toutes</option>
+                        <option value="important">Importantes uniquement</option>
+                        <option value="none">Aucune</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <h2>Apparence</h2>
+                <div class="form-row">
+                    <label for="theme">Thème</label>
+                    <select id="theme" name="theme">
+                        <option value="light">Clair</option>
+                        <option value="dark">Sombre</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <h2>Sécurité</h2>
+                <div class="form-row">
+                    <label for="2fa">Authentification à deux facteurs</label>
+                    <select id="2fa" name="2fa">
+                        <option value="enabled">Activée</option>
+                        <option value="disabled">Désactivée</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="password">Changer le mot de passe</label>
+                    <input type="password" id="password" name="password" placeholder="Nouveau mot de passe">
+                </div>
+            </section>
+
+            <section class="form-actions">
+                <button class="btn btn-primary" type="button" id="saveBtn">Enregistrer</button>
+                <button class="btn btn-secondary" type="button">Annuler</button>
+            </section>
+        </form>
+    </main>
+    <script>
+        const successMsg = document.getElementById('successMessage');
+        const errorMsg = document.getElementById('errorMessage');
+        const saveBtn = document.getElementById('saveBtn');
+        const currencySelect = document.getElementById('currency');
+        const languageSelect = document.getElementById('language');
+        const themeSelect = document.getElementById('theme');
+        let successTimeout = null;
+
+        // Load user settings on page load
+        window.addEventListener('load', async function () {
+            await loadUserSettings();
+        });
+
+        async function loadUserSettings() {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                console.log('Fetching user settings...');
+                const apiBase = window.API_BASE || 'http://localhost:4000';
+                const response = await fetch(apiBase + '/api/auth/me', {
+                    method: 'GET',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    if (data.currency && currencySelect) currencySelect.value = data.currency;
+                    if (data.language && languageSelect) languageSelect.value = data.language;
+                    if (data.theme && themeSelect) themeSelect.value = data.theme;
+                }
+            } catch (err) {
+                console.error('Error loading settings:', err);
+            }
+        }
+
+        // Save button click handler
+        saveBtn.addEventListener('click', async function () {
+            console.log('Save button clicked');
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    showError('Session expired, please login again');
+                    return;
+                }
+
+                const currency = currencySelect ? currencySelect.value : '';
+                const language = languageSelect ? languageSelect.value : '';
+                const theme = themeSelect ? themeSelect.value : '';
+
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Enregistrement en cours...';
+
+                const apiBase = window.API_BASE || 'http://localhost:4000';
+                const response = await fetch(apiBase + '/api/auth/me', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ currency, language, theme })
+                });
+
+                const data = await response.json();
+                console.log('Save response:', response.status, data);
+
+                if (!response.ok) {
+                    showError(data.error || 'Failed to save settings');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Enregistrer';
+                    return;
+                }
+
+                showSuccess('✓ Vos modifications ont été enregistrées!');
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Enregistrer';
+
+                // Auto-hide success message after 3 seconds
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 3000);
+
+            } catch (err) {
+                console.error('Error saving settings:', err);
+                showError('Erreur: ' + err.message);
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Enregistrer';
+            }
+        });
+
+        function showSuccess(message) {
+            if (successTimeout) clearTimeout(successTimeout);
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+        }
+
+        function showError(message) {
+            if (successTimeout) clearTimeout(successTimeout);
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+        }
+
+        // Replace native selects with a simple custom dropdown for rounded options
+        (function () {
+            const container = document.querySelector('.settings-container');
+            if (!container) return;
+            const selects = Array.from(container.querySelectorAll('select'));
+            selects.forEach((sel) => {
+                const wrapper = document.createElement('div'); wrapper.className = 'custom-select';
+                const display = document.createElement('div'); display.className = 'display';
+                const txt = document.createElement('span'); txt.textContent = sel.options[sel.selectedIndex]?.text || sel.options[0].text;
+                const caret = document.createElement('span'); caret.className = 'caret'; caret.innerHTML = '▾';
+                display.appendChild(txt); display.appendChild(caret);
+
+                const ul = document.createElement('ul'); ul.className = 'options';
+                Array.from(sel.options).forEach((opt, idx) => {
+                    const li = document.createElement('li'); li.textContent = opt.text; li.dataset.value = opt.value; li.addEventListener('click', () => {
+                        sel.value = li.dataset.value; txt.textContent = li.textContent; wrapper.classList.remove('open');
+                        sel.dispatchEvent(new Event('change'));
+                    });
+                    ul.appendChild(li);
+                });
+
+                wrapper.appendChild(display); wrapper.appendChild(ul);
+                sel.style.display = 'none'; sel.parentNode.insertBefore(wrapper, sel);
+
+                // helper to position options fixed so they won't be clipped by parents
+                function openOptions() {
+                    if (!ul.dataset.inited) ul.style.display = 'block';
+                    const rect = display.getBoundingClientRect();
+
+                    // ensure the options are rendered at the top level to avoid stacking/overflow issues
+                    if (ul.parentElement !== document.body) {
+                        document.body.appendChild(ul);
+                        ul.dataset.portal = '1';
+                    }
+
+                    // position at viewport coordinates so it covers underlying fields
+                    ul.style.position = 'fixed';
+                    ul.style.left = rect.left + 'px';
+                    ul.style.top = (rect.bottom + 8) + 'px';
+                    ul.style.width = rect.width + 'px';
+                    ul.style.zIndex = '99999';
+
+                    // ensure visual styles when portaled (background, radius, shadow, overflow)
+                    ul.style.background = '#FFFFFF';
+                    ul.style.borderRadius = '12px';
+                    ul.style.boxShadow = '0 10px 30px rgba(0,0,0,0.08)';
+                    ul.style.maxHeight = '220px';
+                    ul.style.overflow = 'auto';
+                    ul.style.border = '1px solid #EDE7DD';
+
+                    // apply visible state (we use a portal-open marker so CSS can animate)
+                    ul.classList.add('portal-open');
+                    wrapper.classList.add('open');
+                    ul.dataset.inited = '1';
+                }
+
+                function closeOptions() {
+                    wrapper.classList.remove('open');
+                    // remove portal visible marker so CSS/inline hides it
+                    ul.classList.remove('portal-open');
+                    if (ul.parentElement === document.body && ul.dataset.portal) {
+                        // move it offscreen to avoid covering content until reopened
+                        ul.style.left = '-9999px';
+                    }
+                }
+
+                display.addEventListener('click', (e) => { e.stopPropagation(); if (wrapper.classList.contains('open')) closeOptions(); else openOptions(); });
+
+                // open when clicking the label associated with the select
+                const lbl = document.querySelector(`label[for="${sel.id}"]`);
+                if (lbl) {
+                    lbl.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); if (wrapper.classList.contains('open')) closeOptions(); else openOptions(); });
+                }
+
+                // reposition on scroll/resize while open
+                function reposition() {
+                    if (!wrapper.classList.contains('open')) return;
+                    const rect = display.getBoundingClientRect();
+                    ul.style.left = rect.left + 'px';
+                    ul.style.top = (rect.bottom + 8) + 'px';
+                    ul.style.width = rect.width + 'px';
+                }
+                window.addEventListener('scroll', reposition, true);
+                window.addEventListener('resize', reposition);
+            });
+
+            // close on outside click
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.custom-select.open').forEach(el => el.classList.remove('open'));
+            });
+        })();
+    </script>
+
+</body>
+
+</html>

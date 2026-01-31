@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Magasin en Ligne</title>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="css/reset.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/composant.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body class="login-page">
+    <header class="auth-header">
+        <a href="index.html" class="back-link">← Retour</a>
+    </header>
+
+    <section class="auth-hero">
+        <div class="auth-panel">
+            <h2>Inscription</h2>
+            <p>Créez votre compte pour profiter de nos offres et gérer vos commandes.</p>
+
+            <div id="signupError" style="color:#A03B2C;margin:0.5rem 0;display:none;"></div>
+
+            <label for="prenom">Prénom</label>
+            <input type="text" id="prenom" placeholder="Votre prénom">
+
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" placeholder="Votre nom">
+
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="votre@email.com">
+
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" placeholder="Au moins 6 caractères">
+
+            <label for="confirm_password">Confirmer mot de passe</label>
+            <input type="password" id="confirm_password" placeholder="Confirmez votre mot de passe">
+
+            <button class="btn btn-primary" id="signupBtn">Créer compte</button>
+            <script>
+                const btn = document.getElementById('signupBtn');
+                const errorEl = document.getElementById('signupError');
+
+                btn.addEventListener('click', async function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('BUTTON CLICKED');
+
+                    
+                    const prenom = document.getElementById('prenom').value.trim();
+                    const nom = document.getElementById('nom').value.trim();
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value;
+                    const confirm = document.getElementById('confirm_password').value;
+
+                    console.log('Values:', { prenom, nom, email });
+
+                    
+                    if (!prenom || !nom || !email || !password || !confirm) {
+                        errorEl.textContent = 'Veuillez remplir tous les champs.';
+                        errorEl.style.color = '#A03B2C';
+                        errorEl.style.display = 'block';
+                        console.log('Validation: missing fields');
+                        return false;
+                    }
+
+                    if (password !== confirm) {
+                        errorEl.textContent = 'Les mots de passe ne correspondent pas.';
+                        errorEl.style.color = '#A03B2C';
+                        errorEl.style.display = 'block';
+                        console.log('Validation: passwords dont match');
+                        return false;
+                    }
+
+                    if (password.length < 6) {
+                        errorEl.textContent = 'Le mot de passe doit contenir au moins 6 caractères.';
+                        errorEl.style.color = '#A03B2C';
+                        errorEl.style.display = 'block';
+                        console.log('Validation: password too short');
+                        return false;
+                    }
+
+                   
+                    btn.disabled = true;
+                    btn.textContent = 'Création en cours...';
+                    console.log('Calling API...');
+
+                    try {
+                        console.log('About to fetch...');
+                        const response = await fetch('http://localhost:4000/api/auth/signup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ prenom, nom, email, password })
+                        });
+
+                        console.log('Fetch completed, status:', response.status);
+
+                        const data = await response.json();
+                        console.log('Response data:', data);
+
+                        if (!response.ok) {
+                            const msg = data.error || data.message || 'Erreur lors de la création du compte';
+                            console.error('API Error:', msg);
+                            errorEl.textContent = msg;
+                            errorEl.style.color = '#A03B2C';
+                            errorEl.style.display = 'block';
+                            btn.disabled = false;
+                            btn.textContent = 'Créer compte';
+                            return false;
+                        }
+
+                       
+                        console.log('SUCCESS!');
+                        if (data.token) localStorage.setItem('authToken', data.token);
+                        if (data.user && data.user.id) localStorage.setItem('userId', data.user.id);
+
+                        
+                        errorEl.innerHTML = `<span style="color: #28a745;">✓ Compte créé avec succès! Redirection...</span>`;
+                        errorEl.style.display = 'block';
+                        console.log('Redirecting to home.html');
+
+
+                        
+                        try {
+                            localStorage.removeItem('cart'); 
+
+                            
+                            const cartRes = await fetch('http://localhost:4000/api/cart', {
+                                headers: { 'Authorization': 'Bearer ' + data.token }
+                            });
+                        } catch (e) {
+                            console.error('Cart reset error', e);
+                            localStorage.removeItem('cart');
+                        }
+
+                        
+                        setTimeout(() => {
+                            window.location.href = 'home.html';
+                        }, 500);
+
+                    } catch (err) {
+                        console.error('EXCEPTION:', err.message);
+                        errorEl.textContent = 'Erreur: ' + err.message;
+                        errorEl.style.color = '#A03B2C';
+                        errorEl.style.display = 'block';
+                        btn.disabled = false;
+                        btn.textContent = 'Créer compte';
+                    }
+                    return false;
+                });
+            </script>
+        </div>
+    </section>
+</body>
+
+</html>

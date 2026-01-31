@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Magasin en Ligne</title>
+    <link rel="stylesheet" href="css/reset.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/composant.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+    <header class="no-style-header">
+        <button id="menuboutton" style="font-size: 25px; text-decoration: none;"> ☰ </button>
+        <button id="searchOpenBtn" class="search-open" aria-label="Ouvrir la recherche"
+            style="font-size: 25px; text-decoration: none;">🔍</button>
+        <h1> ARW Cosmetics</h1>
+        <div class="icons">
+            <a href="panier.html" style="font-size: 27px; text-decoration: none; position: relative;">
+                🛒
+                <span class="cart-badge" id="cartBadge"
+                    style="position: absolute; top: -8px; right: -8px; background: #E59A59; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">0</span>
+            </a>
+        </div>
+    </header>
+    <div id="searchPanel" class="search-panel" aria-hidden="true">
+        <div class="search-panel-inner">
+            <button id="searchCloseBtn" class="search-close" aria-label="Fermer la recherche">✕</button>
+            <h2>Rechercher un produit</h2>
+            <form id="miniSearchForm">
+                <input id="miniSearchInput" type="text" placeholder="Tapez le nom du produit...">
+            </form>
+        </div>
+    </div>
+    <aside id="menucote" class="sidebar">
+        <button class="close-menu" aria-label="Fermer le menu">✕</button>
+        <nav>
+            <ul>
+                <li><a href="home.html">🏠 Accueil</a></li>
+                <li><a href="profil.html">👤 Profil</a></li>
+                <li><a href="parametre.html">⚙️ Paramètres</a></li>
+                <li><a href="aide.html">❓ Aide</a></li>
+                <li><a href="index.html" class="logout">🚪 Déconnexion</a></li>
+            </ul>
+        </nav>
+    </aside>
+    <main>
+        <div class="container">
+            <section class="slider" id="sliderContainer">
+                
+            </section>
+
+            <section class="prod-par-cat">
+                <h2> Soins Visage</h2>
+                <div class="cartes-prod" id="home-soins-visage">
+                    
+                </div>
+
+                <h2> Soins Corps</h2>
+                <div class="cartes-prod" id="home-soins-corps">
+                    
+                </div>
+
+                <h2> Ongles</h2>
+                <div class="cartes-prod" id="home-ongles">
+                    
+                </div>
+            </section>
+            </section>
+        </div>
+        <section class="bg-gallery" aria-hidden="false"></section>
+    </main>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="script.js"></script>
+    <script>
+        document.querySelector('a.logout') && document.querySelector('a.logout').addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userId');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+
+</html>

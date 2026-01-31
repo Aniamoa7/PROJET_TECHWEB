@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Magasin en Ligne</title>
+    <link rel="stylesheet" href="css/reset.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/composant.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body class="cart-page">
+    <header class="cart-header">
+        <div class="container" style="display: flex; align-items: center; justify-content: space-between;">
+            <a href="home.html" class="back-link">← Retour</a>
+            <h1>Mon Panier</h1>
+            <a href="panier.html" style="font-size: 27px; text-decoration: none; position: relative;">
+                🛒
+                <span class="cart-badge" id="cartBadge"
+                    style="position: absolute; top: -8px; right: -8px; background: #E59A59; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">0</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="container cart-layout">
+        <section class="cart-items" id="cart-items">
+            <h2>Contenu du Panier</h2>
+            <div class="cart-empty" id="cart-empty">Votre panier est vide.</div>
+            
+        </section>
+
+        <aside class="cart-summary" id="cart-summary">
+            <h2>Résumé de la Commande</h2>
+            <p>Total des Articles: <strong id="cart-count">0</strong></p>
+            <p>Total Prix: <strong id="cart-total">0 DA</strong></p>
+            <button class="btn btn-primary full" id="checkout-btn">Passer à la Caisse</button>
+        </aside>
+    </main>
+
+    <footer class="cart-footer full-width">
+        <p>&copy; 2026 Magasin de Cosmétiques.</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script>
+        const API_BASE = (window.API_BASE || 'http://localhost:4000') + '/api';
+
+        // ========== CART HELPERS ==========
+        function getCart() {
+            try {
+                const raw = localStorage.getItem('cart');
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveCart(cart) {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const cart = getCart();
+            const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) {
+                badge.textContent = total;
+                badge.style.display = total > 0 ? 'flex' : 'none';
+            }
+        }
+
+        // ========== REMOVE ITEM ==========
+        function removeFromCart(productId) {
+            let cart = getCart();
+            cart = cart.filter(item => item.id !== productId);
+            saveCart(cart);
+            loadCartItems();
+        }
+
+        // ========== UPDATE QUANTITY ==========
+        function updateQuantity(productId, newQuantity) {
+            let cart = getCart();
+            const item = cart.find(i => i.id === productId);
+            if (item) {
+                if (newQuantity <= 0) {
+                    removeFromCart(productId);
+                } else {
+                    item.quantity = newQuantity;
+                    saveCart(cart);
+                    loadCartItems();
+                }
+            }
+        }
+
+        // ========== LOAD & DISPLAY CART ITEMS ==========
+        function loadCartItems() {
+            const cart = getCart();
+            const container = document.getElementById('cart-items');
+            const emptyMsg = document.getElementById('cart-empty');
+            const cartSummary = document.getElementById('cart-summary');
+
+            if (cart.length === 0) {
+                emptyMsg.style.display = 'block';
+                cartSummary.style.display = 'none';
+                return;
+            }
+
+            emptyMsg.style.display = 'none';
+            cartSummary.style.display = 'block';
+
+            // Clear previous items (keep heading)
+            const heading = container.querySelector('h2');
+            container.innerHTML = '';
+            container.appendChild(heading);
+
+            let totalPrice = 0;
+            let totalItems = 0;
+
+            cart.forEach(item => {
+                totalItems += item.quantity;
+                const itemTotal = item.price * item.quantity;
+                totalPrice += itemTotal;
+
+                const itemEl = document.createElement('div');
+                itemEl.className = 'cart-item';
+                itemEl.setAttribute('data-product-id', item.id);
+                itemEl.style.cssText = `
+                    display: flex;
+                    gap: 1rem;
+                    padding: 1rem;
+                    border: 1px solid #EDE7DD;
+                    border-radius: 8px;
+                    margin-bottom: 1rem;
+                    align-items: flex-start;
+                `;
+
+                itemEl.innerHTML = `
+                    <img src="${item.image || 'https://via.placeholder.com/80x80?text=No+Image'}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 0.5rem 0;">${item.name}</h3>
+                        <p style="margin: 0 0 0.5rem 0; color: #E59A59; font-weight: 600;">${item.price} DA</p>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <button class="btn-decrease" data-product-id="${item.id}" style="padding: 0.25rem 0.5rem; border: 1px solid #E59A59; background: white; color: #E59A59; border-radius: 4px; cursor: pointer;">-</button>
+                            <span class="qty-display" style="min-width: 30px; text-align: center;">${item.quantity}</span>
+                            <button class="btn-increase" data-product-id="${item.id}" style="padding: 0.25rem 0.5rem; border: 1px solid #E59A59; background: white; color: #E59A59; border-radius: 4px; cursor: pointer;">+</button>
+                            <span class="item-total" style="margin-left: auto; font-weight: 600;">${itemTotal} DA</span>
+                            <button class="btn-remove" data-product-id="${item.id}" style="padding: 0.5rem; border: none; background: #E59A59; color: white; border-radius: 4px; cursor: pointer;">Supprimer</button>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(itemEl);
+            });
+
+            // Update summary
+            document.getElementById('cart-count').textContent = totalItems;
+            document.getElementById('cart-total').textContent = totalPrice + ' DA';
+            updateCartBadge();
+
+            // Attach event listeners to buttons
+            attachCartEventListeners();
+        }
+
+        // ========== ATTACH EVENT LISTENERS ==========
+        function attachCartEventListeners() {
+            // Remove buttons
+            document.querySelectorAll('.btn-remove').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-product-id');
+                    removeFromCart(productId);
+                });
+            });
+
+            document.querySelectorAll('.btn-increase').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-product-id');
+                    const cart = getCart();
+                    const item = cart.find(i => i.id === productId);
+                    if (item) {
+                        updateQuantity(productId, item.quantity + 1);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-decrease').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-product-id');
+                    const cart = getCart();
+                    const item = cart.find(i => i.id === productId);
+                    if (item) {
+                        updateQuantity(productId, item.quantity - 1);
+                    }
+                });
+            });
+        }
+
+        // ========== INITIALIZE ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCartItems();
+            updateCartBadge();
+
+            // Checkout button handler
+            const checkoutBtn = document.getElementById('checkout-btn');
+            if (checkoutBtn) {
+                checkoutBtn.addEventListener('click', async () => {
+                    const token = localStorage.getItem('authToken');
+                    if (!token) {
+                        window.location.href = 'login.html';
+                        return;
+                    }
+
+                    const cart = getCart();
+                    if (cart.length === 0) {
+                        alert('Votre panier est vide');
+                        return;
+                    }
+
+                    try {
+                        checkoutBtn.disabled = true;
+                        checkoutBtn.textContent = 'En cours...';
+
+                        const response = await fetch(API_BASE + '/cart/sync', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body: JSON.stringify({ items: cart })
+                        });
+
+                        if (response.ok) {
+                            // Navigate to payment/address page - for now we just alert
+                            // In a real app: window.location.href = 'checkout.html';
+                            alert('Panier synchronisé avec succès! (Simulation de redirection vers paiement)');
+                        } else {
+                            const data = await response.json();
+                            alert('Erreur: ' + (data.error || 'Impossible de sauvegarder le panier'));
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('Erreur de connexion');
+                    } finally {
+                        checkoutBtn.disabled = false;
+                        checkoutBtn.textContent = 'Passer à la Caisse';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

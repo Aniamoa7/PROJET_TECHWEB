@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Se connecter a son compte</title>
+    <script src="js/config.js"></script>
+    <link rel="stylesheet" href="css/reset.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/composant.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body class="login-page">
+    <header class="auth-header">
+        <a href="index.html" class="back-link">← Retour</a>
+    </header>
+
+    <section class="auth-hero">
+        <div class="auth-panel">
+            <h2>Se connecter</h2>
+            <p>Connectez-vous à votre compte pour accéder à vos informations personnelles.</p>
+
+            <div id="loginError" style="color:#A03B2C;margin:0.5rem 0;display:none;"></div>
+
+            <label for="email">Email :</label>
+            <input type="email" id="email" placeholder="votre@email.com">
+
+            <label for="password">Mot de passe :</label>
+            <input type="password" id="password" placeholder="Votre mot de passe">
+
+            <button class="btn btn-primary" id="loginBtn">Se connecter</button>
+
+            <script>
+                const btn = document.getElementById('loginBtn');
+                const errorEl = document.getElementById('loginError');
+
+                btn.addEventListener('click', async function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('LOGIN BUTTON CLICKED');
+
+               
+                    const email = document.getElementById('email').value.trim();
+                    const password = document.getElementById('password').value;
+
+                    console.log('Login values:', { email });
+
+                    
+                    if (!email || !password) {
+                        errorEl.textContent = 'Veuillez entrer votre email et mot de passe.';
+                        errorEl.style.color = '#A03B2C';
+                        errorEl.style.display = 'block';
+                        console.log('Validation: missing fields');
+                        return false;
+                    }
+
+                    
+                    btn.disabled = true;
+                    btn.textContent = 'Connexion en cours...';
+                    console.log('Calling login API...');
+
+                    try {
+                        console.log('About to fetch login...');
+                        const response = await fetch('http://localhost:4000/api/auth/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password })
+                        });
+
+                        console.log('Fetch completed, status:', response.status);
+
+                        const data = await response.json();
+                        console.log('Response data:', data);
+
+                        if (!response.ok) {
+                            const msg = data.error || data.message || 'Email ou mot de passe incorrect';
+                            console.error('Login API Error:', msg);
+                            errorEl.textContent = msg;
+                            errorEl.style.color = '#A03B2C';
+                            errorEl.style.display = 'block';
+                            btn.disabled = false;
+                            btn.textContent = 'Se connecter';
+                            return false;
+                        }
+
+                       
+                        console.log('LOGIN SUCCESS!');
+                        if (data.token) localStorage.setItem('authToken', data.token);
+                        if (data.user && data.user.id) localStorage.setItem('userId', data.user.id);
+
+                        
+                        errorEl.innerHTML = `<span style="color: #28a745;">✓ Connexion réussie! Redirection...</span>`;
+                        errorEl.style.display = 'block';
+                        console.log('Redirecting to home.html');
+
+                        
+                        try {
+                            const cartRes = await fetch('http://localhost:4000/api/cart', {
+                                headers: { 'Authorization': 'Bearer ' + data.token }
+                            });
+                            if (cartRes.ok) {
+                                const cartData = await cartRes.json();
+                                
+                                if (cartData.items) {
+                                    
+                                    const mappedCart = cartData.items.map(item => ({
+                                        id: item.productId,
+                                        name: item.productName,
+                                        price: item.priceAt,
+                                        quantity: item.quantity,
+                                        image: item.image 
+                                    }));
+                                    localStorage.setItem('cart', JSON.stringify(mappedCart));
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Failed to load cart on login', e);
+                            localStorage.removeItem('cart'); 
+                        }
+
+                        
+                        setTimeout(() => {
+                            window.location.href = 'home.html';
+                        }, 500);
+
+                    } catch (err) {
+                        console.error('EXCEPTION:', err.message);
+                        errorEl.textContent = 'Erreur: ' + err.message;
+                        errorEl.style.color = '#A03B2C';
+                        errorEl.style.display = 'block';
+                        btn.disabled = false;
+                        btn.textContent = 'Se connecter';
+                    }
+                    return false;
+                });
+            </script>
+        </div>
+    </section>
+</body>
+
+</html>

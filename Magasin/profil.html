@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil - Magasin en Ligne</title>
+    <link rel="stylesheet" href="css/reset.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/composant.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body>
+    <header class="profile-header">
+        <a href="home.html" class="back-link">← Retour</a>
+        <div class="profile-heading">
+            <span class="profile-avatar" aria-hidden="true">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4" fill="#712E1E" />
+                    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" fill="#712E1E" />
+                </svg>
+            </span>
+            <h1>Mon profil</h1>
+        </div>
+    </header>
+
+    <main class="profile-container container">
+        <section class="form-section">
+            <h2>Informations personnelles</h2>
+            <div id="profileError" style="color:#A03B2C;margin:0.5rem 0;display:none;"></div>
+            <div id="profileSuccess" style="color:#28a745;margin:0.5rem 0;display:none;"></div>
+            <form id="profileForm">
+                <input type="text" id="nom" name="nom" placeholder="Nom" disabled>
+                <input type="text" id="prenom" name="prenom" placeholder="Prénom" disabled>
+                <input type="email" id="email" name="email" placeholder="Email" disabled>
+                <input type="tel" id="telephone" name="telephone" placeholder="Téléphone" disabled>
+            </form>
+        </section>
+
+        <section class="form-section">
+            <h2>Adresse de livraison</h2>
+            <form>
+                <input type="text" id="adresse" name="adresse" placeholder="Adresse" disabled>
+                <input type="text" id="ville" name="ville" placeholder="Ville" disabled>
+                <input type="text" id="codepostal" name="codepostal" placeholder="Code Postal" disabled>
+                <input type="text" id="pays" name="pays" placeholder="Pays" disabled>
+            </form>
+        </section>
+
+        <section class="form-section">
+            <h2>Moyens de paiement</h2>
+            <form>
+                <input type="text" id="nomcarte" name="nomcarte" placeholder="Nom sur la carte" disabled>
+                <input type="text" id="numcarte" name="numcarte" placeholder="Numéro de carte" disabled>
+                <input type="text" id="dateexp" name="dateexp" placeholder="Date d'expiration" disabled>
+                <input type="text" id="cvv" name="cvv" placeholder="CVV" disabled>
+            </form>
+        </section>
+
+        <section class="form-actions">
+            <button class="btn btn-primary" id="saveBtn" type="button" style="display:none;">Sauvegarder les
+                modifications</button>
+            <button class="btn btn-secondary" id="editBtn" type="button">Modifier</button>
+        </section>
+
+    </main>
+
+    <div class="lipstick-wrap" aria-hidden="true">
+        <div class="lipstick">
+            <div class="lipstick-body"></div>
+            <div class="lipstick-tip"></div>
+        </div>
+    </div>
+
+    <div class="lipstick-wrap alt" aria-hidden="true">
+        <div class="lipstick">
+            <div class="lipstick-body"></div>
+            <div class="lipstick-tip"></div>
+        </div>
+    </div>
+
+    <script>
+        const editBtn = document.getElementById('editBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const profileForm = document.getElementById('profileForm');
+        const errorEl = document.getElementById('profileError');
+        const successEl = document.getElementById('profileSuccess');
+
+        let isEditMode = false;
+        let successTimeout = null;
+
+        // Load user profile on page load
+        window.addEventListener('load', async function () {
+            console.log('Profil page loaded');
+            console.log('localStorage authToken:', localStorage.getItem('authToken'));
+            console.log('localStorage userId:', localStorage.getItem('userId'));
+            await loadUserProfile();
+        });
+
+        async function loadUserProfile() {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    console.log('No auth token, redirecting to login');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                console.log('Fetching user profile...');
+                const apiBase = window.API_BASE || 'http://localhost:4000';
+                const response = await fetch(apiBase + '/api/auth/me', {
+                    method: 'GET',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                console.log('Profile response status:', response.status);
+                const data = await response.json();
+                console.log('Profile data:', data);
+
+                if (!response.ok) {
+                    console.error('Failed to load profile:', data.error);
+                    errorEl.textContent = data.error || 'Failed to load profile';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                // Fill in the form with user data
+                document.getElementById('nom').value = data.nom || '';
+                document.getElementById('prenom').value = data.prenom || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('telephone').value = data.phone || '';
+                document.getElementById('adresse').value = data.adresse || '';
+                document.getElementById('ville').value = data.ville || '';
+                document.getElementById('codepostal').value = data.codepostal || '';
+                document.getElementById('pays').value = data.pays || '';
+                document.getElementById('nomcarte').value = data.nomcarte || '';
+                document.getElementById('numcarte').value = data.numcarte || '';
+                document.getElementById('dateexp').value = data.dateexp || '';
+                document.getElementById('cvv').value = data.cvv || '';
+
+                console.log('Profile loaded successfully');
+            } catch (err) {
+                console.error('Exception loading profile:', err);
+                errorEl.textContent = 'Erreur: ' + err.message;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        // Toggle edit mode
+        editBtn.addEventListener('click', function () {
+            isEditMode = !isEditMode;
+
+            if (isEditMode) {
+                // Enable edit mode
+                document.getElementById('nom').disabled = false;
+                document.getElementById('prenom').disabled = false;
+                document.getElementById('telephone').disabled = false;
+                document.getElementById('adresse').disabled = false;
+                document.getElementById('ville').disabled = false;
+                document.getElementById('codepostal').disabled = false;
+                document.getElementById('pays').disabled = false;
+                document.getElementById('nomcarte').disabled = false;
+                document.getElementById('numcarte').disabled = false;
+                document.getElementById('dateexp').disabled = false;
+                document.getElementById('cvv').disabled = false;
+                document.getElementById('email').disabled = true; // Email cannot be changed
+
+                editBtn.textContent = 'Annuler';
+                editBtn.classList.add('btn-secondary');
+                saveBtn.style.display = 'inline-block';
+
+                errorEl.style.display = 'none';
+                successEl.style.display = 'none';
+                console.log('Edit mode enabled');
+            } else {
+                // Disable edit mode
+                document.getElementById('nom').disabled = true;
+                document.getElementById('prenom').disabled = true;
+                document.getElementById('telephone').disabled = true;
+                document.getElementById('adresse').disabled = true;
+                document.getElementById('ville').disabled = true;
+                document.getElementById('codepostal').disabled = true;
+                document.getElementById('pays').disabled = true;
+                document.getElementById('nomcarte').disabled = true;
+                document.getElementById('numcarte').disabled = true;
+                document.getElementById('dateexp').disabled = true;
+                document.getElementById('cvv').disabled = true;
+
+                editBtn.textContent = 'Modifier';
+                editBtn.classList.remove('btn-secondary');
+                saveBtn.style.display = 'none';
+
+                // Reload to discard changes
+                loadUserProfile();
+            }
+        });
+
+        // Save profile changes
+        saveBtn.addEventListener('click', async function () {
+            console.log('Save button clicked');
+            try {
+                const token = localStorage.getItem('authToken');
+                console.log('Token from localStorage:', token);
+                if (!token) {
+                    showError('Session expired, please login again');
+                    return;
+                }
+
+                const nom = document.getElementById('nom').value.trim();
+                const prenom = document.getElementById('prenom').value.trim();
+                const phone = document.getElementById('telephone').value.trim();
+                const adresse = document.getElementById('adresse').value.trim();
+                const ville = document.getElementById('ville').value.trim();
+                const codepostal = document.getElementById('codepostal').value.trim();
+                const pays = document.getElementById('pays').value.trim();
+                const nomcarte = document.getElementById('nomcarte').value.trim();
+                const numcarte = document.getElementById('numcarte').value.trim();
+                const dateexp = document.getElementById('dateexp').value.trim();
+                const cvv = document.getElementById('cvv').value.trim();
+
+                console.log('Form values:', { nom, prenom, phone, adresse, ville, codepostal, pays, nomcarte, numcarte, dateexp, cvv });
+
+                if (!nom || !prenom) {
+                    showError('Nom et Prénom sont requis');
+                    return;
+                }
+
+                console.log('Saving profile...');
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Sauvegarde en cours...';
+
+                const apiBase = window.API_BASE || 'http://localhost:4000';
+                const response = await fetch(apiBase + '/api/auth/me', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nom,
+                        prenom,
+                        phone,
+                        adresse,
+                        ville,
+                        codepostal,
+                        pays,
+                        nomcarte,
+                        numcarte,
+                        dateexp,
+                        cvv
+                    })
+                });
+
+                console.log('Save response status:', response.status);
+                const data = await response.json();
+                console.log('Save response:', data);
+
+                if (!response.ok) {
+                    showError(data.error || 'Failed to save profile');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Sauvegarder les modifications';
+                    return;
+                }
+
+                // Success!
+                showSuccess('✓ Profil mis à jour avec succès!');
+
+                console.log('Profile saved successfully');
+
+                // Wait 1.5 seconds then exit edit mode
+                setTimeout(() => {
+                    // Exit edit mode - disable all fields and show Modifier button
+                    isEditMode = true; // Set to true so the toggle will set it to false
+                    editBtn.click();
+                }, 1500);
+
+            } catch (err) {
+                console.error('Exception saving profile:', err);
+                showError('Erreur: ' + err.message);
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Sauvegarder les modifications';
+            }
+        });
+
+        // Helper function to show error messages
+        function showError(message) {
+            // Clear any existing timeout
+            if (successTimeout) clearTimeout(successTimeout);
+
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            successEl.style.display = 'none';
+        }
+
+        // Helper function to show success messages
+        function showSuccess(message) {
+            // Clear any existing timeout
+            if (successTimeout) clearTimeout(successTimeout);
+
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            errorEl.style.display = 'none';
+
+            // Auto-hide success message after 4 seconds
+            successTimeout = setTimeout(() => {
+                successEl.style.display = 'none';
+            }, 4000);
+        }
+    </script>
+
+</body>
+
+</html>

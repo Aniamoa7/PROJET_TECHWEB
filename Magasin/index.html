@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accueil 1 Magasin en Ligne</title>
+    <link rel="stylesheet" href="css/reset.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/composant.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+
+<body class="index-page">
+    <section class="index-hero">
+        <div class="index-hero-content">
+            
+            <div class="logo-arw-deluxe">
+                <div class="logo-badge">
+                    <div class="logo-decorations">
+                        <svg width="18" height="18" viewBox="0 0 20 20" class="deco-left">
+                            <rect x="7" y="2" width="6" height="10" rx="1" fill="#E59A59" />
+                            <path d="M7 12 L10 18 L13 12 Z" fill="#712E1E" />
+                        </svg>
+
+                        <svg width="18" height="18" viewBox="0 0 20 20" class="deco-right">
+                            <circle cx="10" cy="10" r="7" stroke="#E59A59" stroke-width="2" fill="none" />
+                            <circle cx="10" cy="10" r="5" fill="#FFD5AF" opacity="0.5" />
+                        </svg>
+                    </div>
+                    <div class="logo-text-arw">ARW</div>
+                    <div class="logo-divider"></div>
+                    <div class="logo-tagline">Beauty Beyond Boundaries</div>
+                </div>
+            </div>
+
+            <h2>La beauté commence par vous</h2>
+            <p>Bienvenue dans notre magasin en ligne de cosmétiques, où la beauté rencontre la qualité. Découvrez notre
+                large gamme de produits pour prendre soin de vous et révéler votre éclat naturel.</p>
+            <div class="actions">
+                <a href="signin.html" class="button">S'inscrire</a>
+                <a href="login.html" class="button">Se Connecter</a>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <p>&copy; 2026 Magasin de Cosmétiques. Tous droits réservés.</p>
+    </footer>
+    <script>
+        (function () {
+            var img = new Image();
+            img.src = 'Images/BG1.png';
+            var reveal = function () { document.body.classList.add('loaded'); };
+            if (img.complete) {
+                reveal();
+            } else {
+                img.onload = reveal;
+                setTimeout(reveal, 1500);
+            }
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produits - ARW Cosmetics</title>
+    <link rel="stylesheet" href="css/reset.css">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/composant.css">
+    <link rel="stylesheet" href="css/pages.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        
+        .products-wrapper {
+            display: flex;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .products-sidebar {
+            flex: 0 0 280px;
+        }
+
+        .products-main {
+            flex: 1;
+        }
+
+        .filter-box {
+            background: #FFFFFF;
+            border: 1px solid #EDE7DD;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-box h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #712E1E;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .filter-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #E59A59;
+        }
+
+        .filter-item label {
+            cursor: pointer;
+            color: #57534E;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            border: 2px solid #E59A59;
+            color: #E59A59;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .reset-btn:hover {
+            background: #E59A59;
+            color: #FFFFFF;
+        }
+
+        .page-header {
+            background: #FFFFFF;
+            border-bottom: 1px solid #EDE7DD;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            width: 100%;
+            
+            margin: 0 auto;
+            
+        }
+
+        .back-btn {
+            color: #E59A59;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 150ms ease;
+            position: absolute;
+            left: 2rem;
+            
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+        }
+
+        .back-btn:hover {
+            color: #712E1E;
+        }
+
+        .search-wrapper {
+            flex: 1;
+            
+            width: 100% !important;
+            max-width: 800px !important;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input-custom {
+            width: 100%;
+            padding: 0.85rem 3.5rem 0.85rem 1.5rem;
+            border: 2px solid #E0D5C7;
+            border-radius: 9999px !important;
+            
+            font-size: 1rem;
+            background: #FAFAFA;
+            transition: all 200ms ease;
+            box-sizing: border-box;
+        }
+
+        .search-input-custom:focus {
+            outline: none;
+            border-color: #E59A59;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(229, 154, 89, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: transparent !important;
+            
+            border: none;
+            border-radius: 50px;
+            color: #D26B96 !important;
+            
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 150ms ease;
+            z-index: 10;
+        }
+
+        .search-btn:hover {
+            background-color: transparent !important;
+            color: #B25A7D !important;
+            
+            text-shadow: 0 2px 4px rgba(210, 107, 150, 0.4);
+            transform: translateY(-50%) scale(1.15);
+        }
+
+        .header-icons {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            position: absolute;
+            right: 2rem;
+            
+            top: 50%;
+            transform: translateY(-50%);
+            transition: none;
+            z-index: 20;
+        }
+
+        .cart-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            text-decoration: none;
+            color: #1A1410;
+            transition: transform 150ms ease;
+        }
+
+        .cart-link:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #E59A59;
+            color: #FFFFFF;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 2px solid #FFFFFF;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+            border-radius: 12px;
+        }
+
+
+        .product-item {
+            background: transparent;
+            border: 1px solid rgba(237, 231, 221, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 250ms ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-item:hover {
+            box-shadow: 0 8px 24px rgba(113, 46, 30, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: #F5F5F4;
+        }
+
+        .product-body {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(5px);
+        }
+
+        .product-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1A1410;
+            line-height: 1.3;
+        }
+
+        .product-category {
+            font-size: 0.8rem;
+            color: #78716C;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #E59A59;
+            margin: 0.5rem 0;
+        }
+
+        .add-to-cart-btn {
+            margin-top: auto;
+            padding: 0.65rem 1rem;
+            background: #E59A59;
+            border: none;
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #A66935;
+            transform: translateY(-2px);
+        }
+
+        .empty-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #78716C;
+            font-size: 1.1rem;
+        }
+
+        .products-count {
+            font-size: 0.95rem;
+            color: #57534E;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1200px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .products-wrapper {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .products-sidebar {
+                flex: none;
+                width: 100%;
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .filter-box {
+                margin-bottom: 0;
+            }
+
+            .reset-btn {
+                grid-column: 1 / -1;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .header-top {
+                flex-wrap: wrap;
+                padding: 1rem;
+            }
+
+            
+            .back-btn,
+            .header-icons {
+                position: static;
+                transform: none;
+                right: auto;
+                left: auto;
+            }
+
+            .search-wrapper {
+                flex: 1 1 100%;
+                order: 3;
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-top {
+                padding: 0.75rem;
+            }
+
+            .cart-link {
+                font-size: 2rem;
+            }
+        }
+
+        
+        body {
+            background-image: url('Images/brandLOGO.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        
+        .page-header {
+            background: transparent !important;
+            
+            border-bottom: none !important;
+            
+            box-shadow: none !important;
+        }
+
+        
+        .filter-box {
+            background-color: transparent !important;
+            
+            border: 1px solid rgba(229, 154, 89, 0.2);
+            
+            box-shadow: 0 4px 15px rgba(229, 154, 89, 0.15) !important;
+            
+            backdrop-filter: blur(5px);
+            
+        }
+    </style>
+</head>
+
+<body>
+    
+    <div class="page-header">
+        <div class="header-top">
+            <a href="home.html" class="back-btn">← Retour</a>
+
+            <div class="search-wrapper">
+                <input type="text" class="search-input-custom" id="searchInput" placeholder="Rechercher un produit...">
+                <button class="search-btn" id="searchBtn">🔍</button>
+            </div>
+
+            <div class="header-icons">
+                <a href="panier.html" class="cart-link">
+                    🛒
+                    <span class="cart-badge" id="cartBadge">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    
+    <main>
+        <div class="products-wrapper">
+            
+            <aside class="products-sidebar">
+                <div class="filter-box">
+                    <h3>Catégories</h3>
+                    <div class="filter-item">
+                        <input type="checkbox" id="cat-all" class="category-filter" value="all" checked>
+                        <label for="cat-all">Tous les produits</label>
+                    </div>
+                    <div class="filter-item">
+                        <input type="checkbox" id="cat-visage" class="category-filter" value="Soins Visage">
+                        <label for="cat-visage">Soins Visage</label>
+                    </div>
+                    <div class="filter-item">
+                        <input type="checkbox" id="cat-corps" class="category-filter" value="Soins Corps">
+                        <label for="cat-corps">Soins Corps</label>
+                    </div>
+                    <div class="filter-item">
+                        <input type="checkbox" id="cat-cheveux" class="category-filter" value="Soins Cheveux">
+                        <label for="cat-cheveux">Soins Cheveux</label>
+                    </div>
+                    <div class="filter-item">
+                        <input type="checkbox" id="cat-parfums" class="category-filter" value="Parfum">
+                        <label for="cat-parfums">Parfums</label>
+                    </div>
+                    <div class="filter-item">
+                        <input type="checkbox" id="cat-maquillage" class="category-filter" value="Maquillage">
+                        <label for="cat-maquillage">Maquillage</label>
+                    </div>
+                    <div class="filter-item">
+                        <input type="checkbox" id="cat-ongles" class="category-filter" value="Ongles">
+                        <label for="cat-ongles">Ongles</label>
+                    </div>
+                    <button class="reset-btn" id="resetBtn">Réinitialiser</button>
+                </div>
+            </aside>
+
+            
+            <section class="products-main">
+                <div class="products-count">
+                    Produits trouvés: <strong id="productCount">0</strong>
+                </div>
+                <div class="products-grid" id="productsGrid">
+                    
+                </div>
+            </section>
+        </div>
+    </main>
+
+    
+    <footer>
+        <p>© 2026 ARW Cosmetics. Tous droits réservés.</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        const API_BASE = window.API_BASE || 'http://localhost:4000';
+        const API_URL = API_BASE + '/api/products';
+
+        let allProducts = [];
+        let filteredProducts = [];
+
+        // 1. Core Fetch Function
+        async function fetchProducts(searchTerm = '') {
+            try {
+                // Show loading state if needed, or just let it update
+                let apiUrl = `${API_URL}?limit=100`;
+                if (searchTerm) {
+                    apiUrl += '&search=' + encodeURIComponent(searchTerm);
+                }
+
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to fetch products');
+
+                const data = await response.json();
+                allProducts = data.items || [];
+
+                // After fetching new data (subset or all), re-apply local category filters
+                applyFilters();
+
+            } catch (error) {
+                console.error('Error loading products:', error);
+                document.getElementById('productsGrid').innerHTML =
+                    '<div class="empty-message">Erreur lors du chargement des produits. Vérifiez que l\'API est active.</div>';
+            }
+        }
+
+        // 2. Apply Filters (Client-Side Category Filtering)
+        function applyFilters() {
+            const selected = Array.from(document.querySelectorAll('.category-filter:checked'))
+                .map(cb => cb.value);
+
+            // Filtering logic:
+            // - We start with `allProducts` (which is either everything or the search result)
+            // - We filter by category
+
+            if (selected.includes('all') || selected.length === 0) {
+                filteredProducts = [...allProducts];
+            } else {
+                const normalizedSelected = selected.map(cat => String(cat).toLowerCase().trim());
+                filteredProducts = allProducts.filter(p => {
+                    const productCategory = String(p.category || '').toLowerCase().trim();
+                    // Check if product category matches any selected category
+                    // Note: sometimes products have multiple categories? backend sends string.
+                    return normalizedSelected.some(sel => productCategory.includes(sel));
+                });
+            }
+
+            renderProducts();
+            updateCount();
+        }
+
+        // 3. Render
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = '<div class="empty-message">Aucun produit trouvé</div>';
+                return;
+            }
+
+            filteredProducts.forEach(product => {
+                const imageUrl = normPath(product.image1) || 'https://via.placeholder.com/240x180?text=No+Image';
+
+                const card = document.createElement('div');
+                card.className = 'product-item';
+                card.innerHTML = `
+                    <a href="product.html?id=${encodeURIComponent(product.id)}" style="text-decoration: none; color: inherit; display: contents;">
+                        <img src="${imageUrl}" alt="${product.name}" class="product-img" onerror="this.src='https://via.placeholder.com/240x180?text=No+Image'">
+                        <div class="product-body">
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-category">${product.category || 'Produit'}</p>
+                            <div class="product-price">${product.price} DA</div>
+                        </div>
+                    </a>
+                    <button class="add-to-cart-btn" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}">
+                        Ajouter Au panier
+                    </button>
+                `;
+
+                card.querySelector('.add-to-cart-btn').addEventListener('click', () => {
+                    addToCart(product, imageUrl);
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        // 4. Cart Logic
+        function addToCart(product, imageUrl) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existing = cart.find(item => item.id === product.id);
+
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: imageUrl,
+                    quantity: 1
+                });
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+            alert(`${product.name} ajouté au panier!`);
+
+            // Sync with backend if logged in? 
+            // The global script.js handles sync on checkout, but ideally we should sync immediately.
+            // For now, consistent with existing logic.
+        }
+
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cartBadge');
+            if (badge) badge.textContent = total;
+        }
+
+        function updateCount() {
+            const el = document.getElementById('productCount');
+            if (el) el.textContent = filteredProducts.length;
+        }
+
+        // 5. Search Trigger
+        function performSearch() {
+            const term = document.getElementById('searchInput').value.trim();
+            // Fetch fresh results from backend (filtering by search term)
+            fetchProducts(term);
+        }
+
+        // 6. Init & Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial Load
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialSearch = urlParams.get('search') || '';
+
+            if (initialSearch) {
+                document.getElementById('searchInput').value = initialSearch;
+            }
+            fetchProducts(initialSearch);
+
+            updateCartBadge();
+
+            // Header Animation
+            setTimeout(() => {
+                const header = document.querySelector('.header-top');
+                if (header) header.classList.add('header-slide');
+            }, 80);
+
+            // Category Checkboxes -> Client-side filtering on current set
+            document.querySelectorAll('.category-filter').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    // Unique behavior: if 'all' is checked, uncheck others. 
+                    // If specific is checked, uncheck 'all'.
+                    if (cb.value === 'all' && cb.checked) {
+                        document.querySelectorAll('.category-filter:not(#cat-all)').forEach(c => c.checked = false);
+                    } else if (cb.checked) {
+                        document.getElementById('cat-all').checked = false;
+                    }
+                    // If nothing checked, check 'all' by default?
+                    if (!document.querySelector('.category-filter:checked')) {
+                        document.getElementById('cat-all').checked = true;
+                    }
+                    applyFilters();
+                });
+            });
+
+            // Search
+            document.getElementById('searchBtn').addEventListener('click', performSearch);
+            document.getElementById('searchInput').addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+
+            // Reset
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                document.getElementById('searchInput').value = '';
+                // Reset categories
+                document.querySelectorAll('.category-filter').forEach(cb => cb.checked = false);
+                document.getElementById('cat-all').checked = true;
+
+                // Fetch EVERYTHING again (empty search)
+                fetchProducts('');
+            });
+        });
+    </script>
+</body>
+
+</html>
