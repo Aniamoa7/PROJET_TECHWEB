@@ -40,12 +40,28 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!raw) return '';
   var p = String(raw).trim();
   if (!p) return '';
-  // LOCAL: Use localhost images when developing locally
+
+  // Known prefixes
+  const LOCAL_IMAGES_PREFIX = 'http://localhost:4000/images/';
+  const GITHUB_RAW = 'https://raw.githubusercontent.com/Aniamoa7/PROJET_TECHWEB/main/Magasin/ImagesProd/';
+
+  // If the value is already a full URL
+  if (/^https?:\/\//i.test(p)) {
+    // Replace localhost absolute URLs with GitHub raw (avoid mixed-content and unavailable local host)
+    if (p.toLowerCase().indexOf(LOCAL_IMAGES_PREFIX) === 0) {
+      const filename = p.substring(LOCAL_IMAGES_PREFIX.length);
+      return GITHUB_RAW + encodeURIComponent(filename);
+    }
+    // If it's http but not localhost, try upgrading to https to avoid mixed-content
+    if (p.indexOf('http://') === 0) return p.replace(/^http:\/\//i, 'https://');
+    return p; // already https
+  }
+
+  // p is a filename (no protocol). Use localhost during local dev, otherwise GitHub raw.
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:4000/images/' + encodeURIComponent(p);
   }
-  // PRODUCTION: Use GitHub raw URLs to serve Images (public repository)
-  const GITHUB_RAW = 'https://raw.githubusercontent.com/Aniamoa7/PROJET_TECHWEB/main/Magasin/ImagesProd/';
+
   return GITHUB_RAW + encodeURIComponent(p);
 };
 
