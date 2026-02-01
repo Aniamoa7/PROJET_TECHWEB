@@ -34,12 +34,14 @@ app.get('/api/health', (req, res) => {
 
 
 app.use((req, res) => {
-  res.status(404).json({ error: 'Not found' });
+  res.setHeader('Content-Type', 'application/json');
+  res.status(404).json({ error: 'Not found', path: req.path });
 });
 
 
 app.use((err, req, res, next) => {
   console.error(err);
+  res.setHeader('Content-Type', 'application/json');
   res.status(500).json({ error: 'Internal server error', details: err.message });
 });
 

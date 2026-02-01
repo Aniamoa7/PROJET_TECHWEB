@@ -133,17 +133,23 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', require('../middleware/auth'), async (req, res) => {
   try {
+    console.log('[/api/auth/me] Fetching user with ID:', req.user.id);
     const rows = await getAllRows(USERS_SHEET);
+    console.log('[/api/auth/me] Total users in sheet:', rows.length);
     const userRow = rows.find(row => String(row[0]) === req.user.id);
 
     if (!userRow) {
+      console.log('[/api/auth/me] User not found for ID:', req.user.id);
       return res.status(404).json({ error: 'User not found' });
     }
 
     const user = rowToUser(userRow);
+    console.log('[/api/auth/me] Returning user:', user.email);
+    res.setHeader('Content-Type', 'application/json');
     res.json(user);
   } catch (err) {
-    console.error(err);
+    console.error('[/api/auth/me] Error:', err);
+    res.setHeader('Content-Type', 'application/json');
     res.status(500).json({ error: 'Failed to fetch user', details: err.message });
   }
 });
