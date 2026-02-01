@@ -36,14 +36,17 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // normPath is provided by js/utils.js (loaded before script.js on pages that need it)
-  var normPath = window.normPath || function (raw) {
+ var normPath = window.normPath || function (raw) {
   if (!raw) return '';
   var p = String(raw).trim();
   if (!p) return '';
-  var base = window.location.protocol === 'https:' 
-  ? 'https://projet-techweb-arw-cosmetics-backen.onrender.com'
-  : 'http://localhost:4000';
-  return base + '/images/' + encodeURIComponent(p);
+  // LOCAL: Use localhost images when developing locally
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:4000/images/' + encodeURIComponent(p);
+  }
+  // PRODUCTION: Use GitHub raw URLs to serve Images (public repository)
+  const GITHUB_RAW = 'https://raw.githubusercontent.com/Aniamoa7/PROJET_TECHWEB/main/Magasin/ImagesProd/';
+  return GITHUB_RAW + encodeURIComponent(p);
 };
 
   // Mini search panel open/close
