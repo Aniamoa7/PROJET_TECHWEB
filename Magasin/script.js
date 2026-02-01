@@ -37,14 +37,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // normPath is provided by js/utils.js (loaded before script.js on pages that need it)
   var normPath = window.normPath || function (raw) {
-    if (!raw) return '';
-    var p = String(raw).trim();
-    if (!p) return '';
-    var base = window.API_BASE || (window.location.hostname === 'localhost' 
-  ? 'http://localhost:4000' 
-  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com');
-    return base + '/images/' + encodeURIComponent(p);
-  };
+  if (!raw) return '';
+  var p = String(raw).trim();
+  if (!p) return '';
+  var base = window.location.hostname === 'localhost' 
+    ? 'http://localhost:4000' 
+    : 'https://projet-techweb-arw-cosmetics-backen.onrender.com';
+  return base + '/images/' + encodeURIComponent(p);
+};
 
   // Mini search panel open/close
   const searchOpenBtn = document.getElementById('searchOpenBtn');
