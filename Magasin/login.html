@@ -102,27 +102,26 @@
 
                         
                         try {
-                            try {
-                                const cartRes = await fetch(`${API_BASE}/cart`, {
-                                    headers: { 'Authorization': 'Bearer ' + data.token }
-                                });
-                                if (cartRes.ok) {
-                                    const cartData = await cartRes.json();
-                                    if (cartData.items) {
-                                        const mappedCart = cartData.items.map(item => ({
-                                            id: item.productId,
-                                            name: item.productName,
-                                            price: item.priceAt,
-                                            quantity: item.quantity,
-                                            image: item.image
-                                        }));
-                                        localStorage.setItem('cart', JSON.stringify(mappedCart));
-                                    }
+                            const cartRes = await fetch(`${API_BASE}/cart`, {
+                                headers: { 'Authorization': 'Bearer ' + data.token }
+                            });
+                            if (cartRes.ok) {
+                                const cartData = await cartRes.json();
+                                if (cartData.items) {
+                                    const mappedCart = cartData.items.map(item => ({
+                                        id: item.productId,
+                                        name: item.productName,
+                                        price: item.priceAt,
+                                        quantity: item.quantity,
+                                        image: item.image
+                                    }));
+                                    localStorage.setItem('cart', JSON.stringify(mappedCart));
                                 }
-                            } catch (e) {
-                                console.error('Failed to load cart on login', e);
-                                localStorage.removeItem('cart');
                             }
+                        } catch (e) {
+                            console.error('Failed to load cart on login', e);
+                            localStorage.removeItem('cart');
+                        }
                         
 
                         
