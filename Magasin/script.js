@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', function () {
   if (!raw) return '';
   var p = String(raw).trim();
   if (!p) return '';
-  var base = window.location.hostname === 'localhost' 
-    ? 'http://localhost:4000' 
-    : 'https://projet-techweb-arw-cosmetics-backen.onrender.com';
+  var base = window.location.protocol === 'https:' 
+  ? 'https://projet-techweb-arw-cosmetics-backen.onrender.com'
+  : 'http://localhost:4000';
   return base + '/images/' + encodeURIComponent(p);
 };
 
