@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // ==========================================
   const API_BASE = window.location.hostname === 'localhost' 
   ? 'http://localhost:4000/api' 
-  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com';
+  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com/api';
   let authToken = localStorage.getItem('authToken');
 
   // Helper: Make API request
