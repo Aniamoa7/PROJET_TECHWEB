@@ -116,7 +116,7 @@
                 }
 
                 console.log('Fetching user settings...');
-                const response = await fetch(window.API_BASE + '/api/auth/me', {
+                const response = await fetch(window.API_BASE + '/auth/me', {
                     method: 'GET',
                     headers: { 'Authorization': 'Bearer ' + token }
                 });
@@ -149,7 +149,7 @@
                 saveBtn.disabled = true;
                 saveBtn.textContent = 'Enregistrement en cours...';
 
-                const response = await fetch(window.API_BASE + '/api/auth/me', {
+                const response = await fetch(window.API_BASE + '/auth/me', {
                     method: 'PUT',
                     headers: {
                         'Authorization': 'Bearer ' + token,
