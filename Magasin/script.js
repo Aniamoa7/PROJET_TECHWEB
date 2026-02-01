@@ -479,9 +479,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!sliderContainer) return;
 
     try {
-      const base = window.API_BASE || (window.location.hostname === 'localhost' 
+   const base = window.location.hostname === 'localhost' 
   ? 'http://localhost:4000' 
-  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com');
+  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com';
       const res = await fetch(`${base}/api/products?limit=50`);
       if (!res.ok) throw new Error(`API returned ${res.status}`);
       const data = await res.json();
