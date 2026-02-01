@@ -65,16 +65,14 @@
                     console.log('Calling login API...');
 
                     try {
-                        console.log('About to fetch...');
-const API_BASE = window.location.hostname === 'localhost' 
-  ? 'http://localhost:4000/api' 
-  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com/api';
+                                                console.log('About to fetch...');
+                                                const API_BASE = window.API_BASE || (window.location.hostname === 'localhost' ? 'http://localhost:4000/api' : 'https://projet-techweb-arw-cosmetics-backen.onrender.com/api');
 
-const response = await fetch(`${API_BASE}/auth/signup`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({  email, password })
-});
+                                                const response = await fetch(`${API_BASE}/auth/login`, {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ email, password })
+                                                });
 
                         console.log('Fetch completed, status:', response.status);
 
@@ -104,28 +102,28 @@ const response = await fetch(`${API_BASE}/auth/signup`, {
 
                         
                         try {
-                            const cartRes = await fetch('http://localhost:4000/api/cart', {
-                                headers: { 'Authorization': 'Bearer ' + data.token }
-                            });
-                            if (cartRes.ok) {
-                                const cartData = await cartRes.json();
-                                
-                                if (cartData.items) {
-                                    
-                                    const mappedCart = cartData.items.map(item => ({
-                                        id: item.productId,
-                                        name: item.productName,
-                                        price: item.priceAt,
-                                        quantity: item.quantity,
-                                        image: item.image 
-                                    }));
-                                    localStorage.setItem('cart', JSON.stringify(mappedCart));
+                            try {
+                                const cartRes = await fetch(`${API_BASE}/cart`, {
+                                    headers: { 'Authorization': 'Bearer ' + data.token }
+                                });
+                                if (cartRes.ok) {
+                                    const cartData = await cartRes.json();
+                                    if (cartData.items) {
+                                        const mappedCart = cartData.items.map(item => ({
+                                            id: item.productId,
+                                            name: item.productName,
+                                            price: item.priceAt,
+                                            quantity: item.quantity,
+                                            image: item.image
+                                        }));
+                                        localStorage.setItem('cart', JSON.stringify(mappedCart));
+                                    }
                                 }
+                            } catch (e) {
+                                console.error('Failed to load cart on login', e);
+                                localStorage.removeItem('cart');
                             }
-                        } catch (e) {
-                            console.error('Failed to load cart on login', e);
-                            localStorage.removeItem('cart'); 
-                        }
+                        
 
                         
                         setTimeout(() => {
