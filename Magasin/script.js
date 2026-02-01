@@ -40,7 +40,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!raw) return '';
     var p = String(raw).trim();
     if (!p) return '';
-    var base = window.API_BASE || 'http://localhost:4000';
+    var base = window.API_BASE || (window.location.hostname === 'localhost' 
+  ? 'http://localhost:4000' 
+  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com');
     return base + '/images/' + encodeURIComponent(p);
   };
 
@@ -192,7 +194,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // ==========================================
   // API INTEGRATION
   // ==========================================
-  const API_BASE = 'http://localhost:4000/api';
+  const API_BASE = window.location.hostname === 'localhost' 
+  ? 'http://localhost:4000/api' 
+  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com';
   let authToken = localStorage.getItem('authToken');
 
   // Helper: Make API request
@@ -475,7 +479,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!sliderContainer) return;
 
     try {
-      const base = window.API_BASE || 'http://localhost:4000';
+      const base = window.API_BASE || (window.location.hostname === 'localhost' 
+  ? 'http://localhost:4000' 
+  : 'https://projet-techweb-arw-cosmetics-backen.onrender.com');
       const res = await fetch(`${base}/api/products?limit=50`);
       if (!res.ok) throw new Error(`API returned ${res.status}`);
       const data = await res.json();
