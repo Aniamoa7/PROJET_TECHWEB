@@ -1,99 +1,88 @@
-# ARW Cosmetics - E-Commerce Website
+ARW Cosmetics — site e‑commerce
 
-## 🚀 Quick Start
+Description
+----------
+Petit projet e‑commerce composé d'un frontend statique (HTML/CSS/JS) et d'une API Node.js qui lit les données depuis un fichier Excel. Idéal pour prototyper une boutique sans base de données lourde.
 
-### For Windows Users
-Simply **double-click `START_SERVER.bat`** and wait for the browser to open!
+Structure du projet
+-------------------
+- `Magasin/` : frontend (pages HTML, dossiers `CSS/`, `ImagesProd/`, scripts JS)
+- `server/` : backend Node.js + Express
+	- `server/src/index.js` : point d'entrée, middlewares et routes
+	- `server/src/routes/` : routes API (`products`, `auth`, `cart`, `orders`, ...)
+	- `server/src/utils/excel.js` : utilitaire pour lire/écrire l'Excel
+	- `server/data/BDD1.xlsx` : données (produits, utilisateurs, panier, commandes)
+- `START_SERVER.bat` : script Windows pour lancer le serveur local
 
-That's it! The script will:
-- ✅ Check for Node.js
-- ✅ Install dependencies automatically
-- ✅ Start the API server
-- ✅ Open the website in your browser
-
-### Prerequisites
-You need **Node.js** installed on your computer:
-- Download from: https://nodejs.org/ (LTS version recommended)
-- During installation, make sure to check "Add to PATH"
-
-**First-time setup:** Copy `server/.env.example` to `server/.env` and set `JWT_SECRET` to a long random string (required for login/signup).
-
-### Manual Setup (if needed)
-If the .bat file doesn't work:
+Démarrer le projet localement (Node.js)
+-------------------------------------
+1. Installer Node.js (version LTS) depuis https://nodejs.org/
+2. Copier le fichier d'exemple d'environnement si nécessaire :
+	 - `server/.env.example` → `server/.env` et définir `JWT_SECRET`
+3. Ouvrir un terminal dans le dossier `server` :
 
 ```bash
-# 1. Open Command Prompt in the project folder
-# 2. Navigate to server
 cd server
-
-# 3. Install dependencies
 npm install
-
-# 4. Start the server
 node src/index.js
-
-# 5. Open browser to http://localhost:4000/home.html
 ```
 
-### What's Running?
-- **Frontend**: E-commerce website at http://localhost:4000/home.html
-- **API Server**: Backend API on http://localhost:4000
-- **Database**: Excel-based data storage in `server/data/`
+4. Ouvrir le navigateur : `http://localhost:4000/home.html`
 
-### API Endpoints
-- `GET /api/products` - Get all products
-- `GET /api/products/:id` - Get product details
-- `GET /api/products?category=xxx` - Filter by category
-- `POST /api/auth/signup` - Create new account
-- `POST /api/auth/login` - Login to account
-- `GET /api/auth/me` - Get user profile
-- `GET /api/cart` - Get user's cart
-- `POST /api/cart` - Add to cart
-- `POST /api/orders` - Place order
+Si vous préférez le script Windows, double‑cliquez `START_SERVER.bat`.
 
-### File Structure
-```
-PROJET TECHWEB/
-├── Magasin/              (Frontend - HTML/CSS/JS)
-│   ├── home.html
-│   ├── product.html
-│   ├── panier.html
-│   ├── profil.html
-│   ├── CSS/
-│   └── ImagesProd/       (Product images)
-├── server/               (Backend - Node.js/Express)
-│   ├── src/
-│   │   ├── index.js
-│   │   ├── routes/       (API endpoints)
-│   │   └── utils/
-│   ├── data/             (Excel database)
-│   └── package.json
-├── START_SERVER.bat      (Click this to start!)
-└── README.md
-```
+Déploiement (tel que configuré ici)
+----------------------------------
+- Frontend hébergé sur Vercel : https://projetechwbarwcosmetic.vercel.app
+- Backend hébergé sur Render (URL publique fournie lors du déploiement)
 
-### Troubleshooting
+Notes importantes pour la production
+- Définir `JWT_SECRET` dans les variables d'environnement sur Render.
+- Les images peuvent être servies depuis le backend ou depuis GitHub Raw (utilisé ici pour éviter les problèmes de `localhost` en production).
+- Les services cloud restent accessibles sans laisser votre machine allumée.
 
-**"Node.js is not installed"**
-→ Install Node.js from https://nodejs.org/ and restart your computer
+Comment le site a été construit
+------------------------------
+- Frontend : pages HTML/CSS et JavaScript vanilla. Le JS central (`Magasin/script.js`) :
+	- récupère les produits via l'API,
+	- rend les cartes produit, le slider et la page détail,
+	- gère le panier en `localStorage` et les interactions utilisateur.
+- API (backend) : Node.js + Express
+	- routes principales : `/api/products`, `/api/auth`, `/api/cart`, `/api/orders`.
+	- les routes lisent/écrivent dans `server/data/BDD1.xlsx` via `server/src/utils/excel.js`.
+- Authentification :
+	- inscription (`POST /api/auth/signup`) : mot de passe hashé avec `bcrypt`, nouvel utilisateur ajouté à l'Excel, JWT renvoyé au client.
+	- connexion (`POST /api/auth/login`) : vérification du mot de passe et renvoi d'un JWT.
+- Middleware :
+	- `cors()` et `express.json()` pour gérer CORS et le parsing JSON.
+	- middleware `auth` : récupère le token `Authorization: Bearer <token>`, vérifie le JWT (`jwt.verify`) et ajoute `req.user` (id) pour protéger les routes.
+	- middleware statique pour servir `/images` depuis `Magasin/ImagesProd` en local.
 
-**"Port 4000 already in use"**
-→ Close other applications using port 4000, or edit `server/.env` to use a different port
+Comment l'API fonctionne (en bref)
+---------------------------------
+- Les routes produit lisent la feuille `Produit` de l'Excel et retournent des objets JSON.
+- Les routes auth manipulent la feuille `Utisers` (utilisateurs). Le JWT encapsule l'`id` utilisateur.
+- Le panier et les commandes sont conservés partiellement dans l'Excel (pas de vraie base relationnelle).
 
-**"npm install failed"**
-→ Delete the `server/node_modules` folder and try running the .bat again
+Points à savoir / problèmes fréquents
+------------------------------------
+- Si la page est servie en HTTPS, n'utilisez pas d'URL `http://localhost:4000` pour les images ou l'API : navigateur bloque le contenu mixte.
+- Après modifications locales, il faut pousser sur GitHub pour que Vercel/Render redéploient.
+- Ne commitez jamais de secrets (`JWT_SECRET`) dans le repo ; utilisez les variables d'environnement de Render.
 
-**"Website won't load"**
-→ Make sure the command window with the server is still open
+Raccourci des endpoints utiles
+-----------------------------
+- `GET  /api/products` — liste produits
+- `GET  /api/products/:id` — détail produit
+- `POST /api/auth/signup` — créer compte
+- `POST /api/auth/login` — se connecter
+- `GET  /api/auth/me` — profil connecté (JWT requis)
+- `GET  /images/<file>` — images (local)
+
+Si tu veux, je peux :
+- ajouter un script pour exporter/importer la feuille Excel,
+- automatiser l'hébergement des images sur un CDN,
+- ou préparer un petit guide de déploiement pas à pas pour Render/Vercel.
+
+Fin.
 → Check that it says "✅ Server running on http://localhost:4000"
-
-**"Images not showing"**
-→ The server must be running to serve images
-→ Check that `Magasin/ImagesProd/` folder exists
-
-**Production**
-→ Set `NODE_ENV=production` so debug endpoints (`/api/debug/*`) are not exposed.
-
----
-**Created**: 2026
-**Technology**: Node.js, Express, HTML5, CSS3, Vanilla JavaScript, Excel Database
