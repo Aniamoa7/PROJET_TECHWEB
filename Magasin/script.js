@@ -45,19 +45,42 @@ document.addEventListener('DOMContentLoaded', function () {
   const LOCAL_IMAGES_PREFIX = 'http://localhost:4000/images/';
   const GITHUB_RAW = 'https://raw.githubusercontent.com/Aniamoa7/PROJET_TECHWEB/main/Magasin/ImagesProd/';
 
-  // If the value is already a full URL
-  if (/^https?:\/\//i.test(p)) {
-    // Replace localhost absolute URLs with GitHub raw (avoid mixed-content and unavailable local host)
-    if (p.toLowerCase().indexOf(LOCAL_IMAGES_PREFIX) === 0) {
-      const filename = p.substring(LOCAL_IMAGES_PREFIX.length);
+  // Helper to extract filename after any '/images/' segment
+  function extractFilename(path) {
+    var m = path.match(/\/images\/(.+)$/i);
+    if (m && m[1]) return m[1];
+    // fallback: return last path segment
+    var parts = path.split('/');
+    return parts[parts.length - 1] || path;
+  }
+
+  if (/^https?:\/\//i.test(p) || /^\/\//.test(p)) {
+    // If the URL points to a localhost or 127.0.0.1 images resource, rewrite to GitHub raw
+    if (/localhost(:\d+)?\/images\//i.test(p) || /127\.0\.0\.1(:\d+)?\/images\//i.test(p)) {
+      const filename = extractFilename(p);
       return GITHUB_RAW + encodeURIComponent(filename);
     }
     // If it's http but not localhost, try upgrading to https to avoid mixed-content
     if (p.indexOf('http://') === 0) return p.replace(/^http:\/\//i, 'https://');
-    return p; // already https
+    return p; // already https or protocol-relative (//)
   }
 
-  // p is a filename (no protocol). Use localhost during local dev, otherwise GitHub raw.
+  // Handle protocol-less localhost or 127.0.0.1 strings like 'localhost:4000/images/...' or '127.0.0.1:4000/images/...'
+  if (/^(?:localhost|127\.0\.0\.1)(:\d+)?\/images\//i.test(p) || /^\/\/localhost(:\d+)?\/images\//i.test(p) || /^\/\/127\.0\.0\.1(:\d+)?\/images\//i.test(p)) {
+    const filename = extractFilename(p);
+    return GITHUB_RAW + encodeURIComponent(filename);
+  }
+
+  // Handle paths like '/images/...' or 'images/...'
+  if (/^(?:\/)?images\//i.test(p)) {
+    const filename = p.replace(/^(?:\/)?images\//i, '');
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:4000/images/' + encodeURIComponent(filename);
+    }
+    return GITHUB_RAW + encodeURIComponent(filename);
+  }
+
+  // p is a plain filename (no protocol). Use localhost during local dev, otherwise GitHub raw.
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:4000/images/' + encodeURIComponent(p);
   }
